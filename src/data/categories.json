@@ -1,0 +1,38 @@
+[
+  {
+    "id": "designs",
+    "name": "Designs",
+    "description": "Artificial Intelligence and Art projects",
+    "color": "#00FFFF"
+  },
+  {
+    "id": "app",
+    "name": "Apps",
+    "description": "Mobile applications",
+    "color": "#FF00FF"
+  },
+  {
+    "id": "video",
+    "name": "Video Libraries",
+    "description": "All video-based projects and libraries",
+    "color": "#366ac7"
+  },
+  {
+    "id": "websites",
+    "name": "Websites",
+    "description": "Live website libraries with dynamic previews, themes, and assets",
+    "color": "#00C853"
+  },
+  {
+    "id": "major-projects",
+    "name": "Major Projects",
+    "description": "Web development projects",
+    "color": "#6d58d0"
+  },
+  {
+    "id": "github",
+    "name": "GitHub",
+    "description": "Open source projects",
+    "color": "#a446d8"
+  }
+] 

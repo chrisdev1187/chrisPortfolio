@@ -1,0 +1,150 @@
+[
+  {
+    "id": "webDevelopment",
+    "title": "Web Development",
+    "icon": "fa-solid fa-code",
+    "shortDesc": "Custom websites and web applications with cutting-edge technologies",
+    "fullDesc": "I create bespoke websites and web applications that combine stunning design with powerful functionality. Using modern frameworks like React and Next.js, I build responsive, accessible, and performant digital experiences that help businesses stand out online.",
+    "sectionTitle": "Web Development",
+    "subText": "Custom websites and web applications with cutting-edge technologies.",
+    "whatsIncludedTitle": "What's Included",
+    "features": [
+      "Custom website design and development",
+      "Progressive Web Applications (PWAs)",
+      "E-commerce solutions",
+      "Content Management Systems",
+      "Web performance optimization",
+      "Responsive design for all devices"
+    ],
+    "ctaText": "Discuss Your Project",
+    "ctaLink": "#serviceContact",
+    "techSectionTitle": "Technologies I Use",
+    "techTags": [
+      "React",
+      "Next.js",
+      "TailwindCSS",
+      "Node.js",
+      "GraphQL",
+      "WebGL"
+    ],
+    "techMainTitle": "Why Choose Me",
+    "techBullets": [
+      { "icon": "fa-solid fa-wand-magic-sparkles", "text": "Creative Approach" },
+      { "icon": "fa-solid fa-gauge-high", "text": "Performance Focus" },
+      { "icon": "fa-solid fa-user-group", "text": "Collaborative Process" },
+      { "icon": "fa-solid fa-rocket", "text": "Future-Proof Solutions" }
+    ],
+    "order": 0
+  },
+  {
+    "id": "appDevelopment",
+    "title": "App Development",
+    "icon": "fa-solid fa-mobile-screen",
+    "shortDesc": "Native and cross-platform mobile applications for iOS and Android",
+    "fullDesc": "I develop intuitive, high-performance mobile applications that provide seamless user experiences across platforms. Whether you need a native iOS/Android app or a cross-platform solution, I deliver mobile experiences that users love.",
+    "sectionTitle": "App Development",
+    "subText": "Native and cross-platform mobile applications for iOS and Android.",
+    "whatsIncludedTitle": "What's Included",
+    "features": [
+      "Native iOS and Android development",
+      "Cross-platform solutions with React Native",
+      "App UI/UX design",
+      "App performance optimization",
+      "Integration with device features",
+      "App Store submission assistance"
+    ],
+    "ctaText": "Discuss Your Project",
+    "ctaLink": "#serviceContact",
+    "techSectionTitle": "Technologies I Use",
+    "techTags": [
+      "React Native",
+      "Swift",
+      "Kotlin",
+      "Firebase",
+      "Redux",
+      "Native APIs"
+    ],
+    "techMainTitle": "Why Choose Me",
+    "techBullets": [
+      { "icon": "fa-solid fa-wand-magic-sparkles", "text": "Creative Approach" },
+      { "icon": "fa-solid fa-gauge-high", "text": "Performance Focus" },
+      { "icon": "fa-solid fa-user-group", "text": "Collaborative Process" },
+      { "icon": "fa-solid fa-rocket", "text": "Future-Proof Solutions" }
+    ],
+    "order": 1
+  },
+  {
+    "id": "aiServices",
+    "title": "AI Creative Services",
+    "icon": "fa-solid fa-brain",
+    "shortDesc": "AI-powered solutions that push creative boundaries",
+    "fullDesc": "I leverage artificial intelligence to create innovative digital experiences that were previously impossible. From generative art installations to AI-powered user interfaces, I help businesses and artists explore the creative potential of machine learning.",
+    "sectionTitle": "AI Creative Services",
+    "subText": "AI-powered solutions that push creative boundaries.",
+    "whatsIncludedTitle": "What's Included",
+    "features": [
+      "AI-powered web experiences",
+      "Generative art and design",
+      "Machine learning integration",
+      "Computer vision applications",
+      "Natural language processing solutions",
+      "AI chatbots and assistants"
+    ],
+    "ctaText": "Discuss Your Project",
+    "ctaLink": "#serviceContact",
+    "techSectionTitle": "Technologies I Use",
+    "techTags": [
+      "TensorFlow.js",
+      "ML5.js",
+      "Python",
+      "OpenAI API",
+      "Computer Vision",
+      "NLP"
+    ],
+    "techMainTitle": "Why Choose Me",
+    "techBullets": [
+      { "icon": "fa-solid fa-wand-magic-sparkles", "text": "Creative Approach" },
+      { "icon": "fa-solid fa-gauge-high", "text": "Performance Focus" },
+      { "icon": "fa-solid fa-user-group", "text": "Collaborative Process" },
+      { "icon": "fa-solid fa-rocket", "text": "Future-Proof Solutions" }
+    ],
+    "order": 2
+  },
+  {
+    "id": "technicalConsulting",
+    "title": "Technical Consulting",
+    "icon": "fa-solid fa-lightbulb",
+    "shortDesc": "Expert guidance on digital strategy and implementation",
+    "fullDesc": "I provide strategic technical consulting to help businesses navigate the complex digital landscape. From technology selection to implementation roadmaps, I offer expert guidance to ensure your digital initiatives succeed.",
+    "sectionTitle": "Technical Consulting",
+    "subText": "Expert guidance on digital strategy and implementation.",
+    "whatsIncludedTitle": "What's Included",
+    "features": [
+      "Digital transformation strategy",
+      "Technology stack selection",
+      "Technical architecture design",
+      "Code reviews and optimization",
+      "Team training and workshops",
+      "Technical due diligence"
+    ],
+    "ctaText": "Discuss Your Project",
+    "ctaLink": "#serviceContact",
+    "techSectionTitle": "Technologies I Use",
+    "techTags": [
+      "System Architecture",
+      "DevOps",
+      "Cloud Services",
+      "Performance Optimization",
+      "Security",
+      "Scalability"
+    ],
+    "techMainTitle": "Why Choose Me",
+    "techBullets": [
+      { "icon": "fa-solid fa-wand-magic-sparkles", "text": "Creative Approach" },
+      { "icon": "fa-solid fa-gauge-high", "text": "Performance Focus" },
+      { "icon": "fa-solid fa-user-group", "text": "Collaborative Process" },
+      { "icon": "fa-solid fa-rocket", "text": "Future-Proof Solutions" }
+    ],
+    "order": 3
+  }
+] 

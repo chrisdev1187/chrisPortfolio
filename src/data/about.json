@@ -1,0 +1,23 @@
+{
+  "profilePicture": "/profile.jpg",
+  "bio": "I'm Christiaan Bothma, a creative technologist merging code, design, and art to create immersive digital experiences.",
+  "title": "Creative Technologist & Digital Artist",
+  "subtitle": "Merging code, design, and art to create immersive digital experiences",
+  "skills": [
+    "Interactive Development",
+    "AI Integration",
+    "Creative Technology",
+    "WordPress",
+    "Adobe Creative Suite",
+    "Prompt Engineering"
+  ],
+  "experience": "10+ years of experience in creative technology and digital art",
+  "education": "Studied programming for HTML, CSS, Java, and C++ in 2013. Everything else is self-taught.",
+  "location": "Middelburg, South Africa",
+  "email": "christiaanbothma47@gmail.com",
+  "socialLinks": {
+    "github": "https://github.com/chrisdev1187",
+    "linkedin": "https://www.linkedin.com/in/christiaan-bothma47/",
+    "twitter": "https://twitter.com/christiaanbothma"
+  }
+}

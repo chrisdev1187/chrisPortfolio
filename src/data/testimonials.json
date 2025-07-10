@@ -1,0 +1,23 @@
+[
+  {
+    "id": "1",
+    "name": "Sarah Johnson",
+    "company": "Tech Solutions Inc.",
+    "quote": "Christiaan's work on our interactive web platform was outstanding. His ability to blend creative design with robust technology truly brought our vision to life. Highly recommend!",
+    "image": "/sarah.jpg"
+  },
+  {
+    "id": "2",
+    "name": "Michael Chen",
+    "company": "Global Innovations",
+    "quote": "Working with Christiaan was a game-changer for our AI integration project. His insights and technical expertise were invaluable, and the results exceeded our expectations.",
+    "image": "/michael.jpg.jpg"
+  },
+  {
+    "id": "3",
+    "name": "Elena Rodriguez",
+    "company": "Art & Digital Collective",
+    "quote": "As an artist, I appreciate Christiaan's unique approach to creative technology. He transformed my concepts into breathtaking digital art installations, demonstrating true mastery.",
+    "image": "/elena.jpg"
+  }
+]
