@@ -8,7 +8,7 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 // Initialize Supabase client (for server-side operations)
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-const SUPABASE_MEDIA_URL = `${SUPABASE_URL}/storage/v1/object/public/chrisp/public/`;
+const SUPABASE_MEDIA_URL = `${SUPABASE_URL}/storage/v1/object/public/chrisp/`;
 
 async function fetchWebsiteMeta(url) {
   // For demonstration, mock the fetch with static URLs and structure
@@ -53,7 +53,7 @@ async function handler({
         return vid;
       });
     }
-    if (Array.exists(updatedProject.pdfs)) {
+    if (Array.isArray(updatedProject.pdfs)) {
       updatedProject.pdfs = updatedProject.pdfs.map(pdf => {
         if (pdf.url && !pdf.url.startsWith('http')) {
           return { ...pdf, url: SUPABASE_MEDIA_URL + pdf.url };
