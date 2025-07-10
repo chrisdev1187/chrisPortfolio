@@ -17,7 +17,7 @@ import {
   faFileLines
 } from '@fortawesome/free-solid-svg-icons';
 
-const SUPABASE_MEDIA_URL = "https://afbvjxbvbszonmmpunei.supabase.co/storage/v1/object/public/chrisp/";
+const SUPABASE_MEDIA_URL = "https://afbvjxbvbszonmmpunei.supabase.co/storage/v1/object/public/chrisp/public/";
 
 // Icon mapping for FontAwesome icons
 const ICON_MAP = {

@@ -8,7 +8,7 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 // Initialize Supabase client (for server-side operations)
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-const SUPABASE_MEDIA_URL = `${SUPABASE_URL}/storage/v1/object/public/chrisp/`;
+const SUPABASE_MEDIA_URL = `${SUPABASE_URL}/storage/v1/object/public/chrisp/public/`;
 
 async function fetchWebsiteMeta(url) {
   // For demonstration, mock the fetch with static URLs and structure
