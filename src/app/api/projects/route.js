@@ -1,5 +1,14 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
+import { createClient } from '@supabase/supabase-js';
+
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+// Initialize Supabase client (for server-side operations)
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+const SUPABASE_MEDIA_URL = `${SUPABASE_URL}/storage/v1/object/public/chrisp/`;
 
 async function fetchWebsiteMeta(url) {
   // For demonstration, mock the fetch with static URLs and structure
@@ -21,301 +30,161 @@ async function handler({
   category,
   slug,
   featured,
-  projects,
 }) {
-  // Mock data for development if sql is not defined
-  const mockProjects = [
-    {
-      id: 1,
-      title: "Neural Canvas",
-      category: "ai-art",
-      description: "An interactive installation that uses machine learning to transform visitor movements into digital art in real-time.",
-      full_description: "A full description of Neural Canvas.",
-      image_url: "/project1.jpg",
-      client: "Art Gallery",
-      duration: "3 months",
-      technologies: ["React", "TensorFlow.js", "WebGL"],
-      tags: ["AI", "Art", "Installation"],
-      challenge: "Create real-time art from movement.",
-      solution: "Used pose detection and generative art.",
-      results: "High visitor engagement.",
-      project_link: "https://neuralcanvas.example.com",
-      featured: true,
-      display_order: 1
-    },
-    {
-      id: 2,
-      title: "Eco Tracker",
-      category: "app",
-      description: "A sustainability app that helps users monitor and reduce their carbon footprint.",
-      full_description: "A full description of Eco Tracker.",
-      image_url: "/project2.jpg",
-      client: "GreenTech",
-      duration: "6 months",
-      technologies: ["React Native", "Node.js"],
-      tags: ["App", "Sustainability"],
-      challenge: "Track and visualize carbon footprint.",
-      solution: "Built a mobile app with real-time analytics.",
-      results: "Users reduced emissions by 20%.",
-      project_link: "https://ecotracker.example.com",
-      featured: false,
-      display_order: 2
-    },
-    {
-      id: 3,
-      title: "Immersive Storytelling",
-      category: "video",
-      description: "A WebXR narrative experience that blends interactive storytelling with immersive 3D environments.",
-      full_description: "A full description of Immersive Storytelling.",
-      image_url: "/project3.jpg",
-      client: "Media Studio",
-      duration: "4 months",
-      technologies: ["Three.js", "WebXR", "React"],
-      tags: ["WebXR", "Storytelling"],
-      challenge: "Blend story and 3D immersion.",
-      solution: "Used WebXR and interactive scripts.",
-      results: "Award-winning experience.",
-      project_link: "https://immersivestory.example.com",
-      featured: true,
-      display_order: 3
-    },
-    // New Website Project
-    {
-      id: 4,
-      title: "Portfolio Website",
-      category: "website",
-      description: "A personal portfolio website to showcase projects and skills.",
-      full_description: "A full description of the Portfolio Website.",
-      image_url: "/project4.jpg",
-      client: "Self",
-      duration: "2 weeks",
-      technologies: ["Next.js", "TailwindCSS", "Vercel"],
-      tags: ["Website", "Portfolio"],
-      challenge: "Showcase work in a modern, responsive way.",
-      solution: "Built with Next.js and TailwindCSS.",
-      results: "Increased client inquiries.",
-      project_link: "https://portfolio.example.com",
-      featured: false,
-      display_order: 4
-    },
-    // New GitHub Project
-    {
-      id: 5,
-      title: "Open Source CLI Tool",
-      category: "github",
-      description: "A command-line tool published on GitHub for developer productivity.",
-      full_description: "A full description of the CLI tool.",
-      image_url: "/project5.jpg",
-      client: "Open Source",
-      duration: "1 month",
-      technologies: ["Node.js", "Commander.js"],
-      tags: ["CLI", "Open Source", "GitHub"],
-      challenge: "Make repetitive tasks easier for devs.",
-      solution: "Created a flexible CLI with plugins.",
-      results: "100+ GitHub stars.",
-      project_link: "https://github.com/username/cli-tool",
-      featured: false,
-      display_order: 5
+  const transformProjectMediaUrls = (project) => {
+    let updatedProject = { ...project };
+
+    if (updatedProject.image_url && !updatedProject.image_url.startsWith('http')) {
+      updatedProject.image_url = SUPABASE_MEDIA_URL + updatedProject.image_url;
     }
-  ];
+    if (Array.isArray(updatedProject.additional_images)) {
+      updatedProject.additional_images = updatedProject.additional_images.map(img => {
+        if (img && !img.startsWith('http')) {
+          return SUPABASE_MEDIA_URL + img;
+        }
+        return img;
+      });
+    }
+    if (Array.isArray(updatedProject.videos)) {
+      updatedProject.videos = updatedProject.videos.map(vid => {
+        if (vid && !vid.startsWith('http') && !vid.includes('youtube.com') && !vid.includes('youtu.be')) {
+          return SUPABASE_MEDIA_URL + vid;
+        }
+        return vid;
+      });
+    }
+    if (Array.exists(updatedProject.pdfs)) {
+      updatedProject.pdfs = updatedProject.pdfs.map(pdf => {
+        if (pdf.url && !pdf.url.startsWith('http')) {
+          return { ...pdf, url: SUPABASE_MEDIA_URL + pdf.url };
+        }
+        return pdf;
+      });
+    }
+    if (Array.isArray(updatedProject.designs)) {
+      updatedProject.designs = updatedProject.designs.map(design => {
+        if (design && !design.startsWith('http')) {
+          return SUPABASE_MEDIA_URL + design;
+        }
+        return design;
+      });
+    }
+
+    return updatedProject;
+  };
+
   try {
     // Get all projects
     if (action === "getAll") {
-      try {
-        const projectsPath = 'src/data/projects.json';
-        const projects = JSON.parse(fs.readFileSync(projectsPath, 'utf8'));
-        return { success: true, projects };
-      } catch (err) {
-        // Fallback to mock data if file doesn't exist
-        return { success: true, projects: mockProjects };
-      }
+      const { data, error } = await supabase.from('projects').select('*').order('display_order', { ascending: true });
+      if (error) throw error;
+      const transformedProjects = data.map(transformProjectMediaUrls);
+      return { success: true, projects: transformedProjects };
     }
 
     // Get featured projects
     if (action === "getFeatured") {
-      const projects = await sql`
-        SELECT p.*, m.file_url as image_url 
-        FROM projects p
-        LEFT JOIN media m ON p.image_id = m.id
-        WHERE p.featured = true
-        ORDER BY p.display_order ASC, p.created_at DESC
-      `;
-      return { success: true, projects };
+      const { data, error } = await supabase.from('projects').select('*').eq('featured', true).order('display_order', { ascending: true });
+      if (error) throw error;
+      const transformedProjects = data.map(transformProjectMediaUrls);
+      return { success: true, projects: transformedProjects };
     }
 
     // Get projects by category
     if (action === "getByCategory" && category) {
-      const projects = await sql`
-        SELECT p.*, m.file_url as image_url 
-        FROM projects p
-        LEFT JOIN media m ON p.image_id = m.id
-        WHERE p.category = ${category}
-        ORDER BY p.display_order ASC, p.created_at DESC
-      `;
-      return { success: true, projects };
+      const { data, error } = await supabase.from('projects').select('*').eq('category', category).order('display_order', { ascending: true });
+      if (error) throw error;
+      const transformedProjects = data.map(transformProjectMediaUrls);
+      return { success: true, projects: transformedProjects };
     }
 
     // Get a single project by ID
     if (action === "getById" && projectId) {
-      const projects = await sql`
-        SELECT p.*, m.file_url as image_url 
-        FROM projects p
-        LEFT JOIN media m ON p.image_id = m.id
-        WHERE p.id = ${projectId}
-      `;
-
-      if (projects.length === 0) {
+      const { data, error } = await supabase.from('projects').select('*').eq('id', projectId).single();
+      if (error) throw error;
+      if (!data) {
         return { success: false, message: "Project not found" };
       }
-
-      return { success: true, project: projects[0] };
+      return { success: true, project: transformProjectMediaUrls(data) };
     }
 
     // Get a single project by slug
     if (action === "getBySlug" && slug) {
-      const projects = await sql`
-        SELECT p.*, m.file_url as image_url 
-        FROM projects p
-        LEFT JOIN media m ON p.image_id = m.id
-        WHERE p.slug = ${slug}
-      `;
-
-      if (projects.length === 0) {
+      const { data, error } = await supabase.from('projects').select('*').eq('slug', slug).single();
+      if (error) throw error;
+      if (!data) {
         return { success: false, message: "Project not found" };
       }
-
-      return { success: true, project: projects[0] };
+      return { success: true, project: transformProjectMediaUrls(data) };
     }
 
     // Create a new project
     if (action === "create" && projectData) {
-      try {
-        const projectsPath = 'src/data/projects.json';
-        const existingProjects = JSON.parse(fs.readFileSync(projectsPath, 'utf8'));
-        let websiteMeta = {};
-        if (projectData.category === 'websites' && projectData.project_link) {
-          websiteMeta = await fetchWebsiteMeta(projectData.project_link);
-        }
-        const newProject = {
-          id: Date.now(),
-          title: projectData.title,
-          category: projectData.category,
-          description: projectData.description,
-          full_description: projectData.full_description,
-          image_url: projectData.image_url,
-          additional_images: projectData.additional_images || [],
-          pdfs: projectData.pdfs || [],
-          client: projectData.client,
-          duration: projectData.duration,
-          technologies: projectData.technologies || [],
-          tags: projectData.tags || [],
-          challenge: projectData.challenge,
-          solution: projectData.solution,
-          results: projectData.results,
-          project_link: projectData.project_link,
-          ...websiteMeta,
-          featured: projectData.featured || false,
-          display_order: projectData.display_order || existingProjects.length + 1,
-          videos: projectData.videos || [],
-          icons: projectData.icons || [],
-          socialMedia: projectData.socialMedia || {},
-          designs: projectData.designs || []
-        };
-        
-        existingProjects.push(newProject);
-        fs.writeFileSync(projectsPath, JSON.stringify(existingProjects, null, 2));
-        
-        return { success: true, project: newProject };
-      } catch (err) {
-        return { success: false, message: 'Failed to create project.' };
+      let websiteMeta = {};
+      if (projectData.category === 'websites' && projectData.project_link) {
+        websiteMeta = await fetchWebsiteMeta(projectData.project_link);
       }
+      const newProject = {
+        ...projectData,
+        ...websiteMeta,
+      };
+      const { data, error } = await supabase.from('projects').insert([newProject]).select();
+      if (error) throw error;
+      return { success: true, project: transformProjectMediaUrls(data[0]) };
     }
 
     // Update a project
     if (action === "update" && projectId && projectData) {
-      try {
-        const projectsPath = 'src/data/projects.json';
-        const existingProjects = JSON.parse(fs.readFileSync(projectsPath, 'utf8'));
-        
-        const projectIndex = existingProjects.findIndex(p => p.id == projectId);
-        if (projectIndex === -1) {
-          return { success: false, message: "Project not found" };
-        }
-        
-        // Update the project with new data
-        existingProjects[projectIndex] = {
-          ...existingProjects[projectIndex],
-          title: projectData.title,
-          category: projectData.category,
-          description: projectData.description,
-          full_description: projectData.full_description,
-          image_url: projectData.image_url,
-          additional_images: projectData.additional_images || existingProjects[projectIndex].additional_images || [],
-          pdfs: projectData.pdfs || existingProjects[projectIndex].pdfs || [],
-          client: projectData.client,
-          duration: projectData.duration,
-          technologies: projectData.technologies || [],
-          tags: projectData.tags || [],
-          challenge: projectData.challenge,
-          solution: projectData.solution,
-          results: projectData.results,
-          project_link: projectData.project_link,
-          featured: projectData.featured || false,
-          display_order: projectData.display_order || existingProjects[projectIndex].display_order,
-          videos: projectData.videos || existingProjects[projectIndex].videos || [],
-          icons: projectData.icons || existingProjects[projectIndex].icons || [],
-          socialMedia: projectData.socialMedia || existingProjects[projectIndex].socialMedia || {},
-          designs: projectData.designs || existingProjects[projectIndex].designs || []
-        };
-        
-        fs.writeFileSync(projectsPath, JSON.stringify(existingProjects, null, 2));
-        
-        return { success: true, project: existingProjects[projectIndex] };
-      } catch (err) {
-        return { success: false, message: 'Failed to update project.' };
+      const { data, error } = await supabase.from('projects').update(projectData).eq('id', projectId).select();
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        return { success: false, message: "Project not found" };
       }
+      return { success: true, project: transformProjectMediaUrls(data[0]) };
     }
 
     // Delete a project
     if (action === "delete" && projectId) {
-      try {
-        const projectsPath = 'src/data/projects.json';
-        const existingProjects = JSON.parse(fs.readFileSync(projectsPath, 'utf8'));
-        
-        const projectIndex = existingProjects.findIndex(p => p.id == projectId);
-        if (projectIndex === -1) {
-          return { success: false, message: "Project not found" };
-        }
-        
-        existingProjects.splice(projectIndex, 1);
-        fs.writeFileSync(projectsPath, JSON.stringify(existingProjects, null, 2));
-        
-        return { success: true, message: "Project deleted successfully" };
-      } catch (err) {
-        return { success: false, message: 'Failed to delete project.' };
-      }
+      const { error } = await supabase.from('projects').delete().eq('id', projectId);
+      if (error) throw error;
+      return { success: true, message: "Project deleted successfully" };
     }
 
-    // Update all projects
-    if (action === "updateAll" && Array.isArray(projects)) {
-      try {
-        fs.writeFileSync('src/data/projects.json', JSON.stringify(projects, null, 2));
-        return { success: true };
-      } catch (err) {
-        return { success: false, message: 'Failed to update projects.' };
-      }
-    }
-
-    return { success: false, message: "Invalid action" };
+    return { success: false, message: "Invalid action or missing parameters" };
   } catch (error) {
-    return {
-      success: false,
-      message: "An error occurred",
-      error: error.message,
-    };
+    console.error("API Handler Error:", error);
+    return { success: false, message: error.message || "An unexpected error occurred" };
   }
 }
+
 export async function POST(request) {
-  const result = await handler(await request.json());
-  return NextResponse.json(result);
+  const body = await request.json();
+  const result = await handler(body);
+
+  if (result.success) {
+    return NextResponse.json(result);
+  } else {
+    return NextResponse.json({ message: result.message }, { status: 500 });
+  }
+}
+
+export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  const action = searchParams.get('action');
+  const projectId = searchParams.get('projectId');
+  const category = searchParams.get('category');
+  const slug = searchParams.get('slug');
+  const featured = searchParams.get('featured') === 'true';
+
+  // For GET requests, we primarily support fetching data, not mutations
+  if (action === "getAll" || action === "getFeatured" || action === "getByCategory" || action === "getById" || action === "getBySlug") {
+    const result = await handler({ action, projectId, category, slug, featured });
+    if (result.success) {
+      return NextResponse.json(result);
+    } else {
+      return NextResponse.json({ message: result.message }, { status: 500 });
+    }
+  }
+
+  return NextResponse.json({ message: "Invalid GET action" }, { status: 400 });
 }
