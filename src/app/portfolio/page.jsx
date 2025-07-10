@@ -17,6 +17,8 @@ import {
   faFileLines
 } from '@fortawesome/free-solid-svg-icons';
 
+const SUPABASE_MEDIA_URL = "https://afbvjxbvbszonmmpunei.supabase.co/storage/v1/object/public/chrisp/";
+
 // Icon mapping for FontAwesome icons
 const ICON_MAP = {
   'graphic-design': faPaintbrush,
@@ -80,8 +82,45 @@ function MainComponent() {
         const data = await response.json();
 
         if (data.success) {
-          // Map old 'website' category to 'major-projects'
-          setProjects(data.projects.map(p => p.category === 'website' ? { ...p, category: 'major-projects' } : p));
+          // Map old 'website' category to 'major-projects' and update media URLs
+          setProjects(data.projects.map(p => {
+            let updatedProject = { ...p };
+            if (p.category === 'website') {
+              updatedProject.category = 'major-projects';
+            }
+
+            // Update image_url
+            if (updatedProject.image_url && updatedProject.image_url.startsWith('/media/')) {
+              updatedProject.image_url = SUPABASE_MEDIA_URL + updatedProject.image_url.replace('/media/', '');
+            }
+
+            // Update additional_images
+            if (Array.isArray(updatedProject.additional_images)) {
+              updatedProject.additional_images = updatedProject.additional_images.map(img => {
+                if (img.startsWith('/media/')) {
+                  return SUPABASE_MEDIA_URL + img.replace('/media/', '');
+                }
+                return img;
+              });
+            }
+
+            // Update videos
+            if (Array.isArray(updatedProject.videos)) {
+              updatedProject.videos = updatedProject.videos.map(vid => {
+                if (vid.startsWith('/media/')) {
+                  return SUPABASE_MEDIA_URL + vid.replace('/media/', '');
+                }
+                return vid;
+              });
+            }
+
+            // Update document_link (for PDFs)
+            if (updatedProject.document_link && updatedProject.document_link.startsWith('/media/')) {
+                updatedProject.document_link = SUPABASE_MEDIA_URL + updatedProject.document_link.replace('/media/', '');
+            }
+
+            return updatedProject;
+          }));
         } else {
           setError(data.message || "Failed to fetch projects");
         }
