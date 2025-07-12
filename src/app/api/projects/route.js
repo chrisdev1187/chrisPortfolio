@@ -18,7 +18,7 @@ async function fetchWebsiteMeta(url) {
     favicon: `https://www.google.com/s2/favicons?domain=${domain}`,
     logo: `https://logo.clearbit.com/${domain}`,
     screenshot: `https://image.thum.io/get/width/800/crop/600/noanimate/${url}`,
-    themeColor: '#222',
+    theme_color: '#222',
     pages: [url],
   };
 }
@@ -35,12 +35,13 @@ async function handler({
     let updatedProject = { ...project };
 
     if (updatedProject.image_url && !updatedProject.image_url.startsWith('http')) {
-      updatedProject.image_url = SUPABASE_MEDIA_URL + updatedProject.image_url;
+      // Ensure the path correctly points to the public/media folder in Supabase
+      updatedProject.image_url = SUPABASE_MEDIA_URL + updatedProject.image_url.replace('/media/', 'public/media/');
     }
     if (Array.isArray(updatedProject.additional_images)) {
       updatedProject.additional_images = updatedProject.additional_images.map(img => {
         if (img && !img.startsWith('http')) {
-          return SUPABASE_MEDIA_URL + img;
+          return SUPABASE_MEDIA_URL + img.replace('/media/', 'public/media/');
         }
         return img;
       });
@@ -48,7 +49,7 @@ async function handler({
     if (Array.isArray(updatedProject.videos)) {
       updatedProject.videos = updatedProject.videos.map(vid => {
         if (vid && !vid.startsWith('http') && !vid.includes('youtube.com') && !vid.includes('youtu.be')) {
-          return SUPABASE_MEDIA_URL + vid;
+          return SUPABASE_MEDIA_URL + vid.replace('/media/', 'public/media/');
         }
         return vid;
       });
@@ -56,7 +57,7 @@ async function handler({
     if (Array.isArray(updatedProject.pdfs)) {
       updatedProject.pdfs = updatedProject.pdfs.map(pdf => {
         if (pdf.url && !pdf.url.startsWith('http')) {
-          return { ...pdf, url: SUPABASE_MEDIA_URL + pdf.url };
+          return { ...pdf, url: SUPABASE_MEDIA_URL + pdf.url.replace('/media/', 'public/media/') };
         }
         return pdf;
       });
@@ -64,7 +65,7 @@ async function handler({
     if (Array.isArray(updatedProject.designs)) {
       updatedProject.designs = updatedProject.designs.map(design => {
         if (design && !design.startsWith('http')) {
-          return SUPABASE_MEDIA_URL + design;
+          return SUPABASE_MEDIA_URL + design.replace('/media/', 'public/media/');
         }
         return design;
       });

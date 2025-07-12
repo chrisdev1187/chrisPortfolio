@@ -98,6 +98,10 @@ export default function MediaAdminPage() {
     ...mediaFiles
   ]));
 
+  const SUPABASE_MEDIA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+    ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/chrisp/`
+    : 'https://afbvjxbvbszonmmpunei.supabase.co/storage/v1/object/public/chrisp/';
+
   return (
     <div className="min-h-screen bg-[#121212] text-white font-poppins flex flex-col items-center py-8">
       <div className="w-full max-w-2xl">
@@ -119,19 +123,20 @@ export default function MediaAdminPage() {
             <div key={file} className="bg-[#1A1A1A] border border-[#333333] rounded-lg p-2 flex flex-col items-center">
               {file.endsWith(".mp4") || file.endsWith(".webm") || file.endsWith(".ogg") ? (
                 <video
-                  src={"/media/" + file}
+                  src={file.startsWith('http') ? file : SUPABASE_MEDIA_URL + file.replace('/media/', 'public/media/')}
                   alt={file}
                   className="w-full h-32 object-cover rounded mb-2"
                   controls
+                  onError={e => { e.target.onerror = null; e.target.poster = '/media/video-error.png'; }}
                 >
                   Your browser does not support the video tag.
                 </video>
               ) : (
                 <img
-                  src={"/media/" + file}
+                  src={file.startsWith('http') ? file : SUPABASE_MEDIA_URL + file.replace('/media/', 'public/media/')}
                   alt={file}
                   className="w-full h-32 object-cover rounded mb-2"
-                  onError={(e) => (e.target.src = "/placeholder.jpg")}
+                  onError={e => { e.target.onerror = null; e.target.src = "/media/image-error.png"; }}
                 />
               )}
               <div className="text-xs truncate w-full mb-2">{file}</div>

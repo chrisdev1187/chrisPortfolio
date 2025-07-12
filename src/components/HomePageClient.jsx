@@ -50,6 +50,30 @@ export default function HomePageClient({ projects, services, contactData, profil
     setTilt({ x: 0, y: 0 });
   };
 
+  // At the top, ensure SUPABASE_MEDIA_URL is defined for both dev and prod
+  const SUPABASE_MEDIA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+    ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/chrisp/`
+    : 'https://afbvjxbvbszonmmpunei.supabase.co/storage/v1/object/public/chrisp/';
+  const profileImageUrl = SUPABASE_MEDIA_URL + 'public/media/profile.jpg';
+
+  // When mapping projects for rendering, filter out duplicates and update image URLs
+  const seen = new Set();
+  const filteredProjects = projects
+    .map(project => {
+      // Ensure image_url uses Supabase Storage URL
+      let updatedProject = { ...project };
+      if (updatedProject.image_url && !updatedProject.image_url.startsWith('http')) {
+        updatedProject.image_url = SUPABASE_MEDIA_URL + updatedProject.image_url.replace('/media/', 'public/media/');
+      }
+      return updatedProject;
+    })
+    .filter(project => {
+      const key = (project.slug || project.title).toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
   return (
     <div className="min-h-screen bg-[#121212] text-white font-poppins">
       {/* Hero Section */}
@@ -167,7 +191,7 @@ export default function HomePageClient({ projects, services, contactData, profil
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {projects.map((project) => (
+            {filteredProjects.map((project) => (
               <div
                 key={project.id}
                 className="group relative overflow-hidden rounded-lg border border-[#333333] hover:border-[#00FFFF] transition-colors"
@@ -220,9 +244,10 @@ export default function HomePageClient({ projects, services, contactData, profil
             <div className="md:w-1/2 relative">
               <div className="w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden border-4 border-[#333333] mx-auto relative z-10">
                 <img
-                  src={profileImage}
+                  src={profileImageUrl}
                   alt="Christiaan Bothma portrait"
                   className="w-full h-full object-cover"
+                  onError={e => { e.target.onerror = null; e.target.src = '/media/image-error.png'; }}
                 />
               </div>
               <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-[#00FFFF]/20 to-[#FF00FF]/20 rounded-full blur-[50px] -z-10"></div>

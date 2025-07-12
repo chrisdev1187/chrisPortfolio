@@ -36,6 +36,11 @@ export default function AboutClient({ testimonials }) {
     "Prompt Engineering",
   ];
 
+  const SUPABASE_MEDIA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+    ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/chrisp/`
+    : 'https://afbvjxbvbszonmmpunei.supabase.co/storage/v1/object/public/chrisp/';
+  const profileImageUrl = SUPABASE_MEDIA_URL + 'public/media/profile.jpg';
+
   return (
     <ClientLayout>
       <div className="min-h-screen bg-[#121212] text-white font-poppins">
@@ -80,15 +85,10 @@ export default function AboutClient({ testimonials }) {
               <div className="md:w-1/2 relative">
                 <div className="w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden border-4 border-[#333333] mx-auto relative z-10">
                                   <img
-                  src="/profile.jpg"
+                  src={profileImageUrl}
                   alt="Christiaan Bothma portrait"
                   className="w-full h-full object-cover"
-                  onError={(e) => {
-                    // Fallback to media directory if root file doesn't exist
-                    if (e.target.src.includes('/profile.jpg')) {
-                      e.target.src = '/media/profile.jpg';
-                    }
-                  }}
+                  onError={e => { e.target.onerror = null; e.target.src = '/media/image-error.png'; }}
                 />
                 </div>
                 <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-[#00FFFF]/20 to-[#FF00FF]/20 rounded-full blur-[50px] -z-10"></div>

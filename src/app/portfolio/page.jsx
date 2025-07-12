@@ -17,7 +17,9 @@ import {
   faFileLines
 } from '@fortawesome/free-solid-svg-icons';
 
-const SUPABASE_MEDIA_URL = "https://afbvjxbvbszonmmpunei.supabase.co/storage/v1/object/public/chrisp/public/";
+const SUPABASE_MEDIA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/chrisp/`
+  : 'https://afbvjxbvbszonmmpunei.supabase.co/storage/v1/object/public/chrisp/';
 
 // Icon mapping for FontAwesome icons
 const ICON_MAP = {
@@ -63,64 +65,59 @@ function MainComponent() {
   const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
-    // Fetch projects and categories from the database
-    const fetchProjects = async () => {
+    async function fetchProjects() {
       try {
         setLoading(true);
-        const response = await fetch("/api/projects", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ action: "getAll" }),
+        const res = await fetch('/api/projects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'getAll' })
         });
-
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
-
-        const data = await response.json();
-
+        const data = await res.json();
         if (data.success) {
           // Map old 'website' category to 'major-projects' and update media URLs
-          setProjects(data.projects.map(p => {
+          let projects = data.projects.map(p => {
             let updatedProject = { ...p };
             if (p.category === 'website') {
               updatedProject.category = 'major-projects';
             }
-
             // Update image_url
-            if (updatedProject.image_url && updatedProject.image_url.startsWith('/media/')) {
-              updatedProject.image_url = SUPABASE_MEDIA_URL + updatedProject.image_url.replace('/media/', '');
+            if (updatedProject.image_url && !updatedProject.image_url.startsWith('http')) {
+              updatedProject.image_url = SUPABASE_MEDIA_URL + updatedProject.image_url.replace('/media/', 'public/media/');
             }
-
             // Update additional_images
             if (Array.isArray(updatedProject.additional_images)) {
               updatedProject.additional_images = updatedProject.additional_images.map(img => {
-                if (img.startsWith('/media/')) {
-                  return SUPABASE_MEDIA_URL + img.replace('/media/', '');
+                if (img && !img.startsWith('http')) {
+                  return SUPABASE_MEDIA_URL + img.replace('/media/', 'public/media/');
                 }
                 return img;
               });
             }
-
             // Update videos
             if (Array.isArray(updatedProject.videos)) {
               updatedProject.videos = updatedProject.videos.map(vid => {
-                if (vid.startsWith('/media/')) {
-                  return SUPABASE_MEDIA_URL + vid.replace('/media/', '');
+                if (vid && !vid.startsWith('http') && !vid.includes('youtube.com') && !vid.includes('youtu.be')) {
+                  return SUPABASE_MEDIA_URL + vid.replace('/media/', 'public/media/');
                 }
                 return vid;
               });
             }
-
             // Update document_link (for PDFs)
-            if (updatedProject.document_link && updatedProject.document_link.startsWith('/media/')) {
-                updatedProject.document_link = SUPABASE_MEDIA_URL + updatedProject.document_link.replace('/media/', '');
+            if (updatedProject.document_link && !updatedProject.document_link.startsWith('http')) {
+              updatedProject.document_link = SUPABASE_MEDIA_URL + updatedProject.document_link.replace('/media/', 'public/media/');
             }
-
             return updatedProject;
-          }));
+          });
+          // Filter out duplicate projects by title (or slug if available)
+          const seen = new Set();
+          projects = projects.filter(p => {
+            const key = (p.slug || p.title).toLowerCase();
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
+          setProjects(projects);
         } else {
           setError(data.message || "Failed to fetch projects");
         }
@@ -130,7 +127,7 @@ function MainComponent() {
       } finally {
         setLoading(false);
       }
-    };
+    }
 
     const fetchCategories = async () => {
       try {
@@ -363,11 +360,13 @@ function MainComponent() {
                       </div>
                     ) : (
                       <div className="relative h-56 overflow-hidden">
-                        <img
-                          src={project.image_url || "/placeholder-project.jpg"}
-                          alt={`${project.title} project thumbnail`}
-                          className="w-full h-full object-cover transition-transform duration-500 ease-in-out hover:scale-105"
-                        />
+                        {project.category === 'major-projects' && project.image_url && (
+                          <img
+                            src={project.image_url}
+                            alt={`${project.title} project thumbnail`}
+                            className="w-full h-full object-cover transition-transform duration-500 ease-in-out hover:scale-105"
+                          />
+                        )}
                         {/* Remove icon display for normal/major projects */}
                         <div className="absolute top-3 right-3">
                           <span className="px-3 py-1 text-xs font-semibold bg-[#121212]/80 backdrop-blur-sm rounded-full">
@@ -408,15 +407,6 @@ function MainComponent() {
                           <i className="fa-solid fa-images mr-1"></i>
                           {project.additional_images.length} more image{project.additional_images.length !== 1 ? 's' : ''}
                         </div>
-                      )}
-                      {/* Project Image for other categories that still need full screen click */}
-                      {(!['designs', 'video', 'app', 'websites', 'github'].includes(project.category) && project.image_url) && (
-                        <img
-                          src={project.image_url}
-                          alt={`${project.title} project image`}
-                          className="w-full h-48 object-cover rounded-lg mt-4 cursor-pointer transform transition-transform duration-300 hover:scale-105"
-                          onClick={() => setSelectedImage(project.image_url)}
-                        />
                       )}
                     </div>
                   </div>
@@ -636,33 +626,37 @@ function MainComponent() {
                   </div>
                 ) : (
                   <div className="relative h-64 md:h-80 overflow-hidden">
-                    <img
-                      src={selectedProject.image_url || "/placeholder-project.jpg"}
-                      alt={`${selectedProject.title} project showcase`}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] to-transparent opacity-70"></div>
-                    {selectedProject.additional_images && selectedProject.additional_images.length > 0 && (
-                      <div className="absolute top-4 left-4">
-                        <span className="px-3 py-1 text-xs font-semibold bg-[#FF00FF]/80 backdrop-blur-sm rounded-full flex items-center">
-                          <i className="fa-solid fa-images mr-1"></i>
-                          +{selectedProject.additional_images.length}
-                        </span>
+                    {selectedProject.category !== 'designs' && selectedProject.category !== 'video' && selectedProject.category !== 'websites' && selectedProject.category !== 'app' && selectedProject.category !== 'github' && selectedProject.category !== 'major-projects' && selectedProject.image_url && (
+                      <div className="relative h-64 md:h-80 overflow-hidden">
+                        <img
+                          src={selectedProject.image_url || "/placeholder-project.jpg"}
+                          alt={`${selectedProject.title} project showcase`}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] to-transparent opacity-70"></div>
+                        {selectedProject.additional_images && selectedProject.additional_images.length > 0 && (
+                          <div className="absolute top-4 left-4">
+                            <span className="px-3 py-1 text-xs font-semibold bg-[#FF00FF]/80 backdrop-blur-sm rounded-full flex items-center">
+                              <i className="fa-solid fa-images mr-1"></i>
+                              +{selectedProject.additional_images.length}
+                            </span>
+                          </div>
+                        )}
+                        <div className="absolute bottom-0 left-0 p-6">
+                          <span className="px-3 py-1 text-xs font-semibold bg-[#121212]/80 backdrop-blur-sm rounded-full mb-3 inline-block">
+                            {selectedProject.category === "app" && "App Development"}
+                            {selectedProject.category === "major-projects" && "Major Projects"}
+                            {selectedProject.category === "designs" && "Designs"}
+                            {selectedProject.category === "video" && "Video"}
+                            {selectedProject.category === "github" && "GitHub"}
+                            {!['app', 'major-projects', 'designs', 'video', 'websites', 'github'].includes(selectedProject.category) && selectedProject.category}
+                          </span>
+                          <h2 className="text-2xl md:text-3xl font-bold">
+                            {selectedProject.title}
+                          </h2>
+                        </div>
                       </div>
                     )}
-                    <div className="absolute bottom-0 left-0 p-6">
-                      <span className="px-3 py-1 text-xs font-semibold bg-[#121212]/80 backdrop-blur-sm rounded-full mb-3 inline-block">
-                        {selectedProject.category === "app" && "App Development"}
-                        {selectedProject.category === "major-projects" && "Major Projects"}
-                        {selectedProject.category === "designs" && "Designs"}
-                        {selectedProject.category === "video" && "Video"}
-                        {selectedProject.category === "github" && "GitHub"}
-                        {!['app', 'major-projects', 'designs', 'video', 'websites', 'github'].includes(selectedProject.category) && selectedProject.category}
-                      </span>
-                      <h2 className="text-2xl md:text-3xl font-bold">
-                        {selectedProject.title}
-                      </h2>
-                    </div>
                   </div>
                 )}
 

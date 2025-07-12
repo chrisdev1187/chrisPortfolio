@@ -14,7 +14,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/media/favicon.png" type="image/png" />
+        <link rel="icon" href="https://afbvjxbvbszonmmpunei.supabase.co/storage/v1/object/public/chrisp/public/media/favicon.png" type="image/png" />
       </head>
       <body className={poppins.className}>
         <ClientLayout>{children}</ClientLayout>

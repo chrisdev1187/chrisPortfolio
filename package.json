@@ -13,8 +13,9 @@
     "@fortawesome/free-brands-svg-icons": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
-    "@supabase/supabase-js": "^2.50.4",
+    "@supabase/supabase-js": "^2.50.5",
     "canvas-confetti": "^1.9.3",
+    "dotenv": "^17.2.0",
     "next": "^14.2.25",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
