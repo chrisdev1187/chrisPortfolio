@@ -18,6 +18,19 @@ function MainComponent() {
     recentVisits: 0,
   });
 
+  // Add handleChange for About Me and Contact sections
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    // If About Me section is active and user state exists
+    if (activeSection === "about" && user) {
+      setUser((prev) => ({ ...prev, [name]: value }));
+    }
+    // If Contact section is active and contact state exists
+    if (activeSection === "contact" && contact) {
+      setContact((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
   useEffect(() => {
     fetch("/api/auth", {
       method: "POST",
@@ -605,16 +618,7 @@ function MainComponent() {
               </span>
             </h1>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Featured Projects */}
-              <FeaturedProjectsEditor />
-              {/* About Me */}
-              <AboutMeEditor />
-              {/* Stats */}
-              <StatsEditor />
-              {/* Testimonials */}
-              <TestimonialsEditor />
               {/* Contact & Social */}
-              <ContactSocialEditor />
             </div>
           </div>
         )}

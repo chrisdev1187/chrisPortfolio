@@ -19,12 +19,9 @@ const validPages = [
   '/admin/login'
 ];
 
-const NavItem = ({ link, index, navLinksCount, pathname, handleContactClick, closeMenu, isMobile }) => {
+const NavItem = ({ link, index, navLinksCount, pathname, closeMenu, isMobile }) => {
   const [hash, setHash] = useState('');
   const [isHovering, setIsHovering] = useState(false);
-
-  const [contactTempActive, setContactTempActive] = useState(false);
-  const contactTimeoutRef = useRef(null);
   const elementRef = useRef(null);
 
   useEffect(() => {
@@ -34,17 +31,10 @@ const NavItem = ({ link, index, navLinksCount, pathname, handleContactClick, clo
     return () => window.removeEventListener('hashchange', updateHash);
   }, [pathname]);
 
-  useEffect(() => {
-    return () => {
-      if (contactTimeoutRef.current) clearTimeout(contactTimeoutRef.current);
-    };
-  }, []);
-
   // Determine if this nav item is active
   let isActive = false;
-  const isContact = link.href === '/#contact';
-  if (isContact) {
-    isActive = contactTempActive;
+  if (link.href === '/#contact') {
+    isActive = hash === '#contact' || pathname === '/#contact';
   } else {
     isActive = pathname === link.href;
   }
@@ -68,52 +58,16 @@ const NavItem = ({ link, index, navLinksCount, pathname, handleContactClick, clo
   } else {
     className += ' text-white';
   }
-
   if (isHovering && enableEffects) className += ' shake';
 
-  // Confetti on click
+  // Debugging
   const handleClick = (e) => {
-    if ((isActive || isHovering) && enableEffects) {
-      const rect = elementRef.current.getBoundingClientRect();
-      const origin = {
-        x: (rect.left + rect.right) / 2 / window.innerWidth,
-        y: (rect.top + rect.bottom) / 2 / window.innerHeight
-      };
-      confetti({
-        particleCount: 50,
-        spread: 21,
-        origin: origin,
-        colors: ['#007bff', '#366ac7', '#6d58d0', '#a446d8', '#d235e0', '#e83e8c']
-      });
-    }
-    if (isContact) {
-      setContactTempActive(true);
-      if (contactTimeoutRef.current) clearTimeout(contactTimeoutRef.current);
-      contactTimeoutRef.current = setTimeout(() => setContactTempActive(false), 5000);
-      handleContactClick(e);
-    }
-    if (!isContact && isMobile) {
+    console.log('NavItem clicked:', link.href, 'isMobile:', isMobile);
+    if (isMobile) {
       closeMenu();
     }
   };
 
-  // Render
-  if (isContact) {
-    return (
-      <a
-        ref={elementRef}
-        key={index}
-        href={link.href}
-        className={className}
-        style={(isActive || isHovering) && enableEffects ? gradientStyle : {}}
-        onClick={handleClick}
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
-      >
-        {link.text}
-      </a>
-    );
-  }
   return (
     <Link
       ref={elementRef}
@@ -124,6 +78,7 @@ const NavItem = ({ link, index, navLinksCount, pathname, handleContactClick, clo
       onClick={handleClick}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
+      scroll={link.href !== '/#contact'}
     >
       {link.text}
     </Link>
@@ -144,24 +99,29 @@ export default function ClientLayout({ children }) {
     { href: "/admin/login", text: "Admin" },
   ];
 
-  const handleContactClick = (e) => {
-    e.preventDefault();
-    if (pathname === "/") {
-      const el = document.getElementById("contact");
+  // Debugging
+  useEffect(() => {
+    console.log('Mobile menu open:', isMenuOpen);
+  }, [isMenuOpen]);
+
+  // For smooth scroll to #contact on homepage
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (window.location.hash === '#contact') {
+      const el = document.getElementById('contact');
       if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
-        window.history.pushState(null, '', '#contact');
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
       }
-    } else {
-      router.push("/#contact");
     }
-  };
+  }, [pathname]);
 
   const isAdminRoute = pathname.startsWith('/admin');
 
   return (
     <>
-      <nav className="fixed w-full z-50 bg-[#121212]/90 backdrop-blur-sm border-b border-[#333333]">
+      <nav className="fixed w-full z-[100] bg-[#121212]/90 backdrop-blur-sm border-b border-[#333333]">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <Link
             href="/"
@@ -178,39 +138,38 @@ export default function ClientLayout({ children }) {
                 index={index}
                 navLinksCount={navLinks.length}
                 pathname={pathname}
-                handleContactClick={handleContactClick}
                 closeMenu={() => setIsMenuOpen(false)}
                 isMobile={false}
               />
             ))}
           </div>
 
-          <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          <button className="md:hidden z-[101]" onClick={() => { setIsMenuOpen(!isMenuOpen); console.log('Hamburger clicked, menu open:', !isMenuOpen); }}>
             <FontAwesomeIcon icon={isMenuOpen ? faXmark : faBars} className="text-2xl text-white" />
           </button>
 
-          <a
+          <Link
             href="/#contact"
-            onClick={handleContactClick}
             className="px-4 py-2 bg-gradient-to-r from-[#00FFFF] to-[#FF00FF] text-black font-bold rounded-md hover:opacity-90 transition-opacity hidden md:block"
           >
             Get in Touch
-          </a>
+          </Link>
         </div>
         {isMenuOpen && (
-          <div className="md:hidden bg-[#1A1A1A] py-4">
-            {navLinks.map((link, index) => (
-              <NavItem
-                key={index}
-                link={link}
-                index={index}
-                navLinksCount={navLinks.length}
-                pathname={pathname}
-                handleContactClick={handleContactClick}
-                closeMenu={() => setIsMenuOpen(false)}
-                isMobile={true}
-              />
-            ))}
+          <div className="md:hidden bg-[#1A1A1A] py-4 fixed top-0 left-0 w-full h-full z-[100] overflow-y-auto">
+            <div className="container mx-auto px-4 pt-20">
+              {navLinks.map((link, index) => (
+                <NavItem
+                  key={index}
+                  link={link}
+                  index={index}
+                  navLinksCount={navLinks.length}
+                  pathname={pathname}
+                  closeMenu={() => setIsMenuOpen(false)}
+                  isMobile={true}
+                />
+              ))}
+            </div>
           </div>
         )}
       </nav>

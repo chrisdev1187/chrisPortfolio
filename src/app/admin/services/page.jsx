@@ -9,7 +9,7 @@ export default function ServicesAdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  // const [iconPicker, setIconPicker] = useState({ open: false, idx: null, field: null, bulletIdx: null }); // Removed IconPicker state
+  // Remove iconPicker state, no longer needed
   const [expanded, setExpanded] = useState({});
 
   useEffect(() => {
@@ -247,7 +247,7 @@ export default function ServicesAdminPage() {
                         <label className="block mb-2 font-bold">Tech Bullets (icon + text)</label>
                         {service.techBullets.map((bullet, bIdx) => (
                           <div key={bIdx} className="flex items-center mb-2 gap-2">
-                            <button type="button" onClick={() => setIconPicker({ open: true, idx, field: "techBullets", bulletIdx: bIdx })} className="w-1/3 flex items-center gap-2 px-2 py-2 bg-[#222222] border border-[#333333] rounded-md text-white">
+                            <button type="button" onClick={() => handleAddTechBullet(idx)} className="w-1/3 flex items-center gap-2 px-2 py-2 bg-[#222222] border border-[#333333] rounded-md text-white">
                               <i className={bullet.icon + " text-2xl"}></i>
                               <span className="truncate">{bullet.icon || "Select Icon"}</span>
                             </button>
@@ -263,19 +263,6 @@ export default function ServicesAdminPage() {
               </div>
             ))}
             <button onClick={handleSave} className="px-6 py-2 bg-gradient-to-r from-[#00FFFF] to-[#FF00FF] text-black font-bold rounded-md hover:opacity-90 transition-opacity mt-6">Save All Changes</button>
-            {iconPicker.open && (
-              <IconPicker
-                value={iconPicker.field === "icon" ? services[iconPicker.idx].icon : services[iconPicker.idx].techBullets[iconPicker.bulletIdx].icon}
-                onSelect={(icon) => {
-                  if (iconPicker.field === "icon") {
-                    handleServiceChange(iconPicker.idx, "icon", icon);
-                  } else if (iconPicker.field === "techBullets") {
-                    handleTechBulletChange(iconPicker.idx, iconPicker.bulletIdx, "icon", icon);
-                  }
-                }}
-                onClose={() => setIconPicker({ open: false, idx: null, field: null, bulletIdx: null })}
-              />
-            )}
           </>
         )}
       </div>

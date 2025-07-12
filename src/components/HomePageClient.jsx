@@ -309,16 +309,16 @@ export default function HomePageClient({ projects, services, contactData, profil
 
             <div className="text-center">
               <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#00FFFF] to-[#FF00FF] text-transparent bg-clip-text mb-2">
-                30+
+                13+
               </div>
-              <p className="text-gray-300">Happy Clients</p>
+              <p className="text-gray-300">Accounts managed</p>
             </div>
 
             <div className="text-center">
               <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#00FFFF] to-[#FF00FF] text-transparent bg-clip-text mb-2">
-                15+
+                20
               </div>
-              <p className="text-gray-300">Awards Won</p>
+              <p className="text-gray-300">Website completed</p>
             </div>
           </div>
         </div>
