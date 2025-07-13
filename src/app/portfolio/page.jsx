@@ -52,6 +52,23 @@ const VIDEO_TOOL_ICONS = {
   davinci: { label: 'DaVinci', icon: <span style={{color:'#222'}}>🄳</span> },
 };
 
+function PDFWithFallback({ url }) {
+  const [error, setError] = React.useState(false);
+  return error ? (
+    <div className="flex items-center justify-center h-full text-red-400 text-lg p-8 text-center">
+      This document could not be found. Please contact the site owner if you need access.
+    </div>
+  ) : (
+    <iframe
+      src={url}
+      title="PDF Viewer"
+      className="w-full h-full"
+      frameBorder="0"
+      onError={() => setError(true)} // Re-enabled onError
+    ></iframe>
+  );
+}
+
 function MainComponent() {
   const [activeFilter, setActiveFilter] = useState("major-projects");
   const [projects, setProjects] = useState([]);
@@ -103,9 +120,47 @@ function MainComponent() {
                 return vid;
               });
             }
+            // Update pdfs array
+            if (Array.isArray(updatedProject.pdfs)) {
+              updatedProject.pdfs = updatedProject.pdfs.map(pdf => {
+                if (pdf && pdf.url) { // Check if pdf and pdf.url exist
+                  let urlToSanitize = pdf.url;
+                  // If it's a relative path, construct the full Supabase URL
+                  if (!pdf.url.startsWith('http')) {
+                    urlToSanitize = SUPABASE_MEDIA_URL + pdf.url.replace('/media/', 'public/media/');
+                  }
+
+                  // Get just the filename from the potentially full URL
+                  let rawFilename = urlToSanitize.split('/').pop();
+
+                  // Unconditionally replace all whitespace characters with underscores in the filename
+                  let sanitizedFilename = rawFilename.replace(/\s/g, '_');
+
+                  // Reconstruct the full path with 'public/media/' prefix
+                  // This assumes the file is always in public/media/
+                  let finalUrl = `${SUPABASE_MEDIA_URL}public/media/${sanitizedFilename}`;
+                  return { ...pdf, url: finalUrl };
+                }
+                return pdf;
+              });
+            }
             // Update document_link (for PDFs)
-            if (updatedProject.document_link && !updatedProject.document_link.startsWith('http')) {
-              updatedProject.document_link = SUPABASE_MEDIA_URL + updatedProject.document_link.replace('/media/', 'public/media/');
+            if (updatedProject.document_link) { // Check if document_link exists
+              let urlToSanitize = updatedProject.document_link;
+              // If it's a relative path, construct the full Supabase URL
+              if (!updatedProject.document_link.startsWith('http')) {
+                urlToSanitize = SUPABASE_MEDIA_URL + updatedProject.document_link.replace('/media/', 'public/media/');
+              }
+
+              // Get just the filename from the potentially full URL
+              let rawFilename = urlToSanitize.split('/').pop();
+
+              // Unconditionally replace all whitespace characters with underscores in the filename
+              let sanitizedFilename = rawFilename.replace(/\s/g, '_');
+
+              // Reconstruct the full path with 'public/media/' prefix
+              let finalUrl = `${SUPABASE_MEDIA_URL}public/media/${sanitizedFilename}`;
+              updatedProject.document_link = finalUrl;
             }
             return updatedProject;
           });
@@ -425,10 +480,11 @@ function MainComponent() {
               <div className="flex-1 overflow-y-auto relative">
                 <button
                   onClick={closeProjectModal}
-                  className="absolute top-4 right-4 bg-white text-black text-4xl font-extrabold rounded-full shadow-lg border-4 border-[#00FFFF] p-3 z-50 hover:bg-[#00FFFF] hover:text-black transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-[#00FFFF]"
+                  className="absolute top-6 right-6 bg-red-500 text-white text-2xl font-bold rounded-full shadow-2xl border-2 border-white p-4 hover:bg-red-600 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-red-500"
                   aria-label="Close project modal"
+                  style={{ zIndex: 9999 }}
                 >
-                  <i className="fa-solid fa-xmark"></i>
+                  ✕
                 </button>
 
                 {/* Mobile-like floating icon sidebar for normal projects only */}
@@ -566,8 +622,9 @@ function MainComponent() {
                           ))}
                           <div className="absolute inset-0 bg-black/40"></div>
                         </div>
+                        {/* Centered title overlay */}
                         <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-                          <h2 className="text-4xl md:text-5xl font-extrabold text-center bg-gradient-to-r from-[#00FFFF] to-[#FF00FF] bg-clip-text text-transparent drop-shadow-lg">
+                          <h2 className="text-4xl md:text-5xl font-extrabold text-center bg-gradient-to-r from-[#00FFFF] to-[#FF00FF] bg-clip-text text-transparent drop_shadow-lg">
                             {selectedProject.title}
                           </h2>
                         </div>
@@ -626,10 +683,10 @@ function MainComponent() {
                   </div>
                 ) : (
                   <div className="relative h-64 md:h-80 overflow-hidden">
-                    {selectedProject.category !== 'designs' && selectedProject.category !== 'video' && selectedProject.category !== 'websites' && selectedProject.category !== 'app' && selectedProject.category !== 'github' && selectedProject.category !== 'major-projects' && selectedProject.image_url && (
+                    {selectedProject.category !== 'designs' && selectedProject.category !== 'video' && selectedProject.category !== 'websites' && selectedProject.category !== 'app' && selectedProject.category !== 'github' && selectedProject.image_url && (
                       <div className="relative h-64 md:h-80 overflow-hidden">
                         <img
-                          src={selectedProject.image_url || "/placeholder-project.jpg"}
+                          src={selectedProject.image_url}
                           alt={`${selectedProject.title} project showcase`}
                           className="w-full h-full object-cover"
                         />
@@ -802,6 +859,14 @@ function MainComponent() {
                     </div>
                   )}
 
+                  {/* Videos Section (for any project with videos) */}
+                  {Array.isArray(selectedProject.videos) && selectedProject.videos.length > 0 && (
+                    <div id="videos" className="mb-8">
+                      <h3 className="text-xl font-bold mb-4">Project Videos</h3>
+                      <VideoGalleryModal videos={selectedProject.videos} onClose={() => {}} />
+                    </div>
+                  )}
+
                   {/* Enhanced PDF Documents Section */}
                   {selectedProject.pdfs && selectedProject.pdfs.length > 0 && (
                     <div id="documents" className="mb-8">
@@ -850,7 +915,7 @@ function MainComponent() {
                                   </div>
                                 </div>
                                 <div className="w-full h-[60vh] bg-black rounded-lg overflow-hidden border border-[#333333] relative">
-                                  <PDFWithFallback url={`${encodeURI(pdf.url)}#page=${currentPdfPage}`} />
+                                  <PDFWithFallback url={`${pdf.url}#page=${currentPdfPage}`} />
                                 </div>
                               </div>
                             )}
@@ -975,23 +1040,6 @@ function MainComponent() {
         </footer>
       </div>
     </ClientLayout>
-  );
-}
-
-function PDFWithFallback({ url }) {
-  const [error, setError] = React.useState(false);
-  return error ? (
-    <div className="flex items-center justify-center h-full text-red-400 text-lg p-8 text-center">
-      This document could not be found. Please contact the site owner if you need access.
-    </div>
-  ) : (
-    <iframe
-      src={url}
-      title="PDF Viewer"
-      className="w-full h-full"
-      frameBorder="0"
-      onError={() => setError(true)}
-    ></iframe>
   );
 }
 

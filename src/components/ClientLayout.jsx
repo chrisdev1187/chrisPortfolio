@@ -60,14 +60,7 @@ const NavItem = ({ link, index, navLinksCount, pathname, closeMenu, isMobile }) 
   }
   if (isHovering && enableEffects) className += ' shake';
 
-  // Debugging
-  const handleClick = (e) => {
-    console.log('NavItem clicked:', link.href, 'isMobile:', isMobile);
-    if (isMobile) {
-      closeMenu();
-    }
-  };
-
+  // Remove onClick to allow default navigation
   return (
     <Link
       ref={elementRef}
@@ -75,7 +68,6 @@ const NavItem = ({ link, index, navLinksCount, pathname, closeMenu, isMobile }) 
       href={link.href}
       className={className}
       style={(isActive || isHovering) && enableEffects ? gradientStyle : {}}
-      onClick={handleClick}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       scroll={link.href !== '/#contact'}
@@ -115,6 +107,11 @@ export default function ClientLayout({ children }) {
         }, 100);
       }
     }
+  }, [pathname]);
+
+  // Close mobile menu after navigation
+  useEffect(() => {
+    setIsMenuOpen(false);
   }, [pathname]);
 
   const isAdminRoute = pathname.startsWith('/admin');
